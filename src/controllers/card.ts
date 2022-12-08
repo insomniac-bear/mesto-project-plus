@@ -1,9 +1,9 @@
 import type { NextFunction, Request, Response } from 'express';
-import { StatusCode } from '../helpers/status-codes';
+import StatusCodes from '../helpers/status-codes';
 import { cardModel } from '../models';
 
 export const getAllCards = (req: Request, res: Response, next: NextFunction) => cardModel.find({})
-  .then((cards) => res.status(StatusCode.OK).json(cards))
+  .then((cards) => res.status(StatusCodes.OK).json(cards))
   .catch((err) => next(err));
 
 export const createCard = (req: Request, res: Response, next: NextFunction) => {
@@ -14,14 +14,14 @@ export const createCard = (req: Request, res: Response, next: NextFunction) => {
     link,
     owner: ownerId,
   })
-    .then((card) => res.status(StatusCode.CREATED).json(card))
+    .then((card) => res.status(StatusCodes.CREATED).json(card))
     .catch((err) => next(err));
 };
 
 export const removeCard = (req: Request, res: Response, next: NextFunction) => {
   const { cardId } = req.params;
   return cardModel.findByIdAndRemove(cardId)
-    .then((card) => res.status(StatusCode.OK).json(card))
+    .then((card) => res.status(StatusCodes.OK).json(card))
     .catch((err) => next(err));
 };
 
@@ -32,7 +32,7 @@ export const likeCard = (req: Request, res: Response, next: NextFunction) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => res.status(StatusCode.OK).json(card))
+    .then((card) => res.status(StatusCodes.OK).json(card))
     .catch((err) => next(err));
 };
 
@@ -43,6 +43,6 @@ export const dislikeCard = (req: Request, res: Response, next: NextFunction) => 
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => res.status(StatusCode.OK).json(card))
+    .then((card) => res.status(StatusCodes.OK).json(card))
     .catch((err) => next(err));
 };
