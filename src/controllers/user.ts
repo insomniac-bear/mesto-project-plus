@@ -33,6 +33,9 @@ export const updateUserProfile = (req: Request, res: Response, next: NextFunctio
   return userModel.findByIdAndUpdate(_id, {
     name,
     about,
+  }, {
+    new: true,
+    runValidators: true,
   })
     .then((user) => res.status(StatusCodes.OK).json(user))
     .catch((err) => next(err));
@@ -41,7 +44,10 @@ export const updateUserProfile = (req: Request, res: Response, next: NextFunctio
 export const updateUserAvatar = (req: Request, res: Response, next: NextFunction) => {
   const { _id } = req.user;
   const { avatar } = req.body;
-  return userModel.findByIdAndUpdate(_id, { avatar })
+  return userModel.findByIdAndUpdate(_id, { avatar }, {
+    new: true,
+    runValidators: true,
+  })
     .then((user) => res.status(StatusCodes.OK).json(user))
     .catch((err) => next(err));
 };
