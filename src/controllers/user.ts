@@ -1,6 +1,22 @@
 import type { NextFunction, Request, Response } from 'express';
+import { ObjectId } from 'mongoose';
 import StatusCodes from '../helpers/status-codes';
 import { userModel } from '../models';
+
+type TUserData = {
+  name?: string;
+  about?: string;
+  avatar?: string;
+};
+
+type TUserId = string | ObjectId;
+
+function updateUserData(userId: TUserId, data: TUserData) {
+  return userModel.findByIdAndUpdate(userId, data, {
+    new: true,
+    runValidators: true,
+  });
+}
 
 export const createUser = (req: Request, res: Response, next: NextFunction) => {
   const { name, about, avatar } = req.body;
@@ -18,6 +34,7 @@ export const createUser = (req: Request, res: Response, next: NextFunction) => {
 
 export const getUserById = (req: Request, res: Response, next: NextFunction) => {
   const id = req.params.userId;
+
   return userModel.findById(id)
     .then((user) => res.status(StatusCodes.OK).json(user))
     .catch((err) => next(err));
@@ -30,13 +47,8 @@ export const getAllUsers = (req: Request, res: Response, next: NextFunction) => 
 export const updateUserProfile = (req: Request, res: Response, next: NextFunction) => {
   const { _id } = req.user;
   const { name, about } = req.body;
-  return userModel.findByIdAndUpdate(_id, {
-    name,
-    about,
-  }, {
-    new: true,
-    runValidators: true,
-  })
+
+  return updateUserData(_id, { name, about })
     .then((user) => res.status(StatusCodes.OK).json(user))
     .catch((err) => next(err));
 };
@@ -44,10 +56,8 @@ export const updateUserProfile = (req: Request, res: Response, next: NextFunctio
 export const updateUserAvatar = (req: Request, res: Response, next: NextFunction) => {
   const { _id } = req.user;
   const { avatar } = req.body;
-  return userModel.findByIdAndUpdate(_id, { avatar }, {
-    new: true,
-    runValidators: true,
-  })
+
+  return updateUserData(_id, { avatar })
     .then((user) => res.status(StatusCodes.OK).json(user))
     .catch((err) => next(err));
 };

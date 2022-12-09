@@ -9,7 +9,7 @@ const errorHandler = (err: any, req: Request, res: Response, next: NextFunction)
   } else if (err instanceof Error.DocumentNotFoundError) {
     res.status(StatusCodes.NOT_FOUND).json({ message: 'Запрашиваемые данные не найдены' });
   } else {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Произошла внутренняя ошибка на сервере' });
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'На сервере произошла ошибка' });
   }
 };
 
