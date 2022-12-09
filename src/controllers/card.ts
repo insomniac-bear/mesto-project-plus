@@ -20,6 +20,7 @@ export const createCard = (req: Request, res: Response, next: NextFunction) => {
 
 export const removeCard = (req: Request, res: Response, next: NextFunction) => {
   const { cardId } = req.params;
+
   return cardModel.findByIdAndRemove(cardId)
     .then((card) => res.status(StatusCodes.OK).json(card))
     .catch((err) => next(err));

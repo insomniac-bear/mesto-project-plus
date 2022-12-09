@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import isUrlValid from '../helpers/validate-url';
 
 interface IUser {
   name: string;
@@ -22,6 +23,10 @@ const userSchema = new mongoose.Schema<IUser>({
   avatar: {
     type: String,
     required: true,
+    validate: {
+      validator: isUrlValid,
+      message: 'Invalid link url',
+    },
   },
 });
 
