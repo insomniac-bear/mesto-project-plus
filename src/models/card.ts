@@ -1,5 +1,5 @@
 import mongoose, { Schema, Types } from 'mongoose';
-import isUrlValid from '../helpers/validate-url';
+import { isUrlValid } from '../helpers/validate-url';
 
 interface ICard {
   name: string;

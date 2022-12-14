@@ -1,4 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
+import UnauthorizedError from '../helpers/unauthorized-error';
+import NotFoundError from '../helpers/not-found-error';
 import StatusCodes from '../helpers/status-codes';
 import { cardModel } from '../models';
 
@@ -20,10 +22,22 @@ export const createCard = (req: Request, res: Response, next: NextFunction) => {
 
 export const removeCard = (req: Request, res: Response, next: NextFunction) => {
   const { cardId } = req.params;
+  const { _id } = req.user;
 
-  return cardModel.findByIdAndRemove(cardId)
+  return cardModel.findById(cardId)
+    .then((card) => {
+      if (!card) {
+        throw new NotFoundError('Карточка не найдена');
+      }
+
+      if (card.owner !== _id) {
+        throw new UnauthorizedError('Недостаточно прав для удаления карточки');
+      }
+      return card;
+    })
+    .then((card) => card.delete())
     .then((card) => res.status(StatusCodes.OK).json(card))
-    .catch((err) => next(err));
+    .catch(next);
 };
 
 export const likeCard = (req: Request, res: Response, next: NextFunction) => {
