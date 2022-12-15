@@ -1,7 +1,9 @@
 import type { NextFunction, Request, Response } from 'express';
-import { ObjectId } from 'mongoose';
+import bcrypt from 'bcrypt';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import StatusCodes from '../helpers/status-codes';
 import { userModel } from '../models';
+import { JWT_SECRET } from '../config/config';
 
 type TUserData = {
   name?: string;
@@ -9,7 +11,7 @@ type TUserData = {
   avatar?: string;
 };
 
-type TUserId = string | ObjectId;
+type TUserId = string | JwtPayload;
 
 function updateUserData(userId: TUserId, data: TUserData) {
   return userModel.findByIdAndUpdate(userId, data, {
@@ -19,17 +21,32 @@ function updateUserData(userId: TUserId, data: TUserData) {
 }
 
 export const createUser = (req: Request, res: Response, next: NextFunction) => {
-  const { name, about, avatar } = req.body;
-
-  return userModel.create({
+  const {
+    email,
+    password,
     name,
     about,
     avatar,
-  })
+  } = req.body;
+
+  bcrypt.hash(password, 10)
+    .then((hash) => userModel.create({
+      email,
+      password: hash,
+      name,
+      about,
+      avatar,
+    }))
     .then((user) => res
       .status(StatusCodes.CREATED)
-      .json(user))
-    .catch((err) => next(err));
+      .json({
+        _id: user._id,
+        email: user.email,
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+      }))
+    .catch(next);
 };
 
 export const getUserById = (req: Request, res: Response, next: NextFunction) => {
@@ -37,12 +54,20 @@ export const getUserById = (req: Request, res: Response, next: NextFunction) => 
 
   return userModel.findById(id)
     .then((user) => res.status(StatusCodes.OK).json(user))
-    .catch((err) => next(err));
+    .catch(next);
+};
+
+export const getUser = (req: Request, res: Response, next: NextFunction) => {
+  const { _id } = req.user;
+
+  return userModel.findById(_id)
+    .then((user) => res.status(StatusCodes.OK).json(user))
+    .catch(next);
 };
 
 export const getAllUsers = (req: Request, res: Response, next: NextFunction) => userModel.find()
   .then((users) => res.status(StatusCodes.OK).json(users))
-  .catch((err) => next(err));
+  .catch(next);
 
 export const updateUserProfile = (req: Request, res: Response, next: NextFunction) => {
   const { _id } = req.user;
@@ -59,5 +84,17 @@ export const updateUserAvatar = (req: Request, res: Response, next: NextFunction
 
   return updateUserData(_id, { avatar })
     .then((user) => res.status(StatusCodes.OK).json(user))
-    .catch((err) => next(err));
+    .catch(next);
+};
+
+export const login = (req: Request, res: Response, next: NextFunction) => {
+  const { email, password } = req.body;
+  return userModel.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
+      res
+        .status(StatusCodes.OK)
+        .send({ token });
+    })
+    .catch(next);
 };

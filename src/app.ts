@@ -1,19 +1,21 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import { errors } from 'celebrate';
 import rootRouter from './routes';
-import fakeAuthMiddleware from './middlewares/fake-auth';
 import errorHandler from './middlewares/error-handler';
-
-const { PORT = 3000 } = process.env;
+import { PORT, DB_URL } from './config/config';
+import { requestLogger, errorLogger } from './middlewares/logger';
 
 const app = express();
+mongoose.connect(DB_URL);
 
 app.use(express.json());
-app.use(fakeAuthMiddleware);
+
+app.use(requestLogger);
 app.use('/', rootRouter);
 
-mongoose.connect('mongodb://localhost:27017/mestodb');
-
+app.use(errorLogger);
+app.use(errors());
 app.use(errorHandler);
 
 app.listen(PORT, () => {
