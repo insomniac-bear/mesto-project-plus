@@ -30,7 +30,7 @@ export const removeCard = (req: Request, res: Response, next: NextFunction) => {
         throw new NotFoundError('Карточка не найдена');
       }
 
-      if (card.owner !== _id) {
+      if (card.owner.toString() !== _id) {
         throw new UnauthorizedError('Недостаточно прав для удаления карточки');
       }
       return card;

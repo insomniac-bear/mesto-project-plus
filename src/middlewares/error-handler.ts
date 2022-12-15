@@ -8,8 +8,8 @@ const errorHandler = (err: any, req: Request, res: Response, next: NextFunction)
     res.status(StatusCodes.BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
   } else if (err instanceof Error.DocumentNotFoundError) {
     res.status(StatusCodes.NOT_FOUND).json({ message: 'Запрашиваемые данные не найдены' });
-  } else if (err.code === 11000) {
-    res.status(StatusCodes.BAD_REQUEST).json({ message: 'Пользователь с таким email уже существует' });
+  } else if (err.name === 'MongoServerError' && err.code === 11000) {
+    res.status(StatusCodes.CONFLICT).json({ message: 'Пользователь с таким email уже существует' });
   } else if (
     err.statusCode === StatusCodes.BAD_REQUEST
     || err.statusCode === StatusCodes.NOT_FOUND

@@ -2,33 +2,16 @@ import { Router } from 'express';
 import { celebrate, Joi } from 'celebrate';
 import auth from '../middlewares/auth';
 import {
-  createUser,
   getAllUsers,
   getUser,
   getUserById,
-  login,
   updateUserAvatar,
   updateUserProfile,
 } from '../controllers/user';
-import { emailRegex, urlRegex } from '../helpers/validate-url';
+import { urlRegex } from '../helpers/validate-url';
 
 export const router = Router();
 
-router.post('/signup', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().regex(emailRegex),
-    password: Joi.string().required().min(8),
-    name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(200),
-    avatar: Joi.string().regex(urlRegex),
-  }),
-}), createUser);
-router.post('/signin', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().regex(emailRegex),
-    password: Joi.string().required().min(8),
-  }),
-}), login);
 router.get('/', [auth, celebrate({
   headers: Joi.object().keys({
     authorization: Joi.string(),
@@ -41,7 +24,7 @@ router.get('/me', [auth, celebrate({
 })], getUser);
 router.get('/:userId', [auth, celebrate({
   params: Joi.object().keys({
-    userId: Joi.string(),
+    userId: Joi.string().length(24).hex().required(),
   }),
   headers: Joi.object().keys({
     authorization: Joi.string(),
